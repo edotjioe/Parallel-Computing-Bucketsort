@@ -11,7 +11,6 @@ public class BucketSort implements Runnable{
     private int start;
 
     private Buckets buckets = new Buckets();
-    private FinalList finalList = new FinalList();
 
     public BucketSort(Integer[] array, int start, Integer minValue, String threadName) {
         this.array = array;
@@ -22,11 +21,7 @@ public class BucketSort implements Runnable{
         DEFAULT_BUCKET_SIZE = array.length;
     }
 
-    public void sort() {
-        sort(this.array, DEFAULT_BUCKET_SIZE);
-    }
-
-    private void sort(Integer[] array, int bucketSize) {
+    private synchronized void sort(Integer[] array, int bucketSize) {
         if (array.length == 0) {
             return;
         }

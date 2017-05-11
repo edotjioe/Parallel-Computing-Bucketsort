@@ -2,12 +2,13 @@ package com.company;
 
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 public class Main {
 
     public static void main(String[] args) {
-        int maxVal = 10;
         Integer [] data = {60, 25, 32, 22, 34, 40, 54, 28, 25, 34, 56, 21, 12, 11, 47, 23, 43, 38, 36, 83, 61};
 
         BucketSort bucketSort1, bucketSort2;
@@ -35,19 +36,19 @@ public class Main {
 
         System.out.println("Before: " + Arrays.toString(data));
 
-        Thread t = new Thread(bucketSort1);
-        Thread v = new Thread(bucketSort2);
+        Thread t1 = new Thread(bucketSort1);
+        Thread t2 = new Thread(bucketSort2);
 
-        t.start();
-        v.start();
+        t1.start();
+        t2.start();
 
-        //bucketSort1.run();
-        //bucketSort2.run();
 
-        //System doesnt wait on threads, need to find a fix, using now a hack fix by waiting on user input
-        Scanner input = new Scanner(System.in);
-        System.out.println("Continue?");
-        input.nextInt();
+        try {
+            t1.join();
+            t2.join();
+        } catch (InterruptedException e){
+            e.printStackTrace();
+        }
 
         // Sort buckets and place back into input array
         int currentIndex = 0;
@@ -61,6 +62,7 @@ public class Main {
         }
         System.out.println("Buckets: " + buckets.getBuckets().toString());
         System.out.println("After:  " + Arrays.toString(data));
+
     }
 
 
