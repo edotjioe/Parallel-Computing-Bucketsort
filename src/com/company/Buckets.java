@@ -15,8 +15,8 @@ public class Buckets {
     }
 
     public static void initialise(int maxValue, int minValue, int bucketSize){
-        int bucketCount = (maxValue - minValue) / bucketSize + 1;
-        buckets = new ArrayList<>(bucketCount);
+        double bucketCount = Math.sqrt(maxValue);
+        buckets = new ArrayList<>((int) bucketCount);
         for (int i = 0; i < bucketCount; i++) {
             buckets.add(new ArrayList<>());
         }

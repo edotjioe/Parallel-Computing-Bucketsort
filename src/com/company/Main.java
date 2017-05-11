@@ -53,6 +53,7 @@ public class Main {
             e.printStackTrace();
         }
 
+        System.out.println("Buckets: " + buckets.getBuckets().toString());
         // Sort buckets and place back into input array
         int currentIndex = 0;
         for (int i = 0; i < buckets.getBuckets().size(); i++) {
@@ -63,7 +64,6 @@ public class Main {
                 data[currentIndex++] = bucketArray[j];
             }
         }
-        System.out.println("Buckets: " + buckets.getBuckets().toString());
         System.out.println("After:  " + Arrays.toString(data));
 
     }
