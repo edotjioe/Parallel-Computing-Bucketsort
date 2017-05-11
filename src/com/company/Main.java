@@ -1,15 +1,18 @@
 package com.company;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         Integer [] data = {60, 25, 32, 22, 34, 40, 54, 28, 25, 34, 56, 21, 12, 11, 47, 23, 43, 38, 36, 83, 61};
+
+        data = readFile();
 
         BucketSort bucketSort1, bucketSort2;
         Buckets buckets = new Buckets();
@@ -65,5 +68,22 @@ public class Main {
 
     }
 
+    public static Integer[] readFile() throws FileNotFoundException {
+        Scanner s = new Scanner(new File("src\\com\\company\\files\\input.txt"));
+        ArrayList<Integer> list = new ArrayList<Integer>();
+        Integer[] array;
+        while (s.hasNext()){
+            list.add(s.nextInt());
+        }
+
+        array = new Integer[list.size()];
+
+        for (int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i);
+        }
+        s.close();
+
+        return array;
+    }
 
 }
