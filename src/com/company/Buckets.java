@@ -10,11 +10,12 @@ public class Buckets {
     public Buckets() {
     }
 
-    public static void add(Integer value, int location){
-        buckets.get(location).add(value);
+    public synchronized static void add(Integer value, int location){
+        if(!value.equals(null))
+            buckets.get(location).add(value);
     }
 
-    public static void initialise(int maxValue, int minValue, int bucketSize){
+    public static void initialise(int maxValue){
         double bucketCount = Math.sqrt(maxValue);
         buckets = new ArrayList<>((int) bucketCount);
         for (int i = 0; i < bucketCount; i++) {

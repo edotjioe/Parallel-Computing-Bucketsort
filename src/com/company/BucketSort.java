@@ -1,41 +1,41 @@
 package com.company;
 
 public class BucketSort implements Runnable{
-    private static int DEFAULT_BUCKET_SIZE = 5;
 
     String threadName;
 
     private Integer[] array;
-    private Integer minValue;
 
     private int start;
 
     private Buckets buckets = new Buckets();
 
-    public BucketSort(Integer[] array, int start, Integer minValue, String threadName) {
+    public BucketSort(Integer[] array, int start, String threadName) {
         this.array = array;
         this.start = start;
-        this.minValue = minValue;
         this.threadName = threadName;
-
-        DEFAULT_BUCKET_SIZE = array.length;
     }
 
-    private synchronized void sort(Integer[] array, int bucketSize) {
+    private void sort(Integer[] array) throws InterruptedException {
         if (array.length == 0) {
             return;
         }
 
         // Distribute input array values into buckets
         for (int i = start; i < array.length; i = i + 2) {
+            if(array[i] != null)
             buckets.add(array[i], (int) Math.sqrt(array[i]));
         }
     }
 
     @Override
     public void run() {
-        System.out.println("Starting " + threadName);
-        sort(array, DEFAULT_BUCKET_SIZE);
+        System.out.println("\u001B[34mStarting " + threadName + "\u001B[0m");
+        try {
+            sort(array);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }

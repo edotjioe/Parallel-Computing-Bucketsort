@@ -10,9 +10,11 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) throws FileNotFoundException {
-        Integer [] data = {60, 25, 32, 22, 34, 40, 54, 28, 25, 34, 56, 21, 12, 11, 47, 23, 43, 38, 36, 83, 61};
+        Integer [] data;
+        Integer [] result;
 
         data = readFile();
+        result = new Integer[data.length];
 
         BucketSort bucketSort1, bucketSort2;
         Buckets buckets = new Buckets();
@@ -24,18 +26,18 @@ public class Main {
         Integer minValue = data[0];
         Integer maxValue = data[0];
         for (int i = 1; i < data.length; i++) {
-            if (data[i] < minValue) {
-                minValue = data[i];
-            } else if (data[i] > maxValue) {
+            if (data[i] > maxValue) {
                 maxValue = data[i];
             }
         }
 
-        bucketSort1 = new BucketSort(data, 0, minValue, "thread 1");
+        long startTime = System.nanoTime();
 
-        bucketSort2 = new BucketSort(data, 1, minValue, "thread 2");
+        bucketSort1 = new BucketSort(data, 0, "thread 1");
 
-        buckets.initialise(maxValue, minValue, data.length);
+        bucketSort2 = new BucketSort(data, 1, "thread 2");
+
+        buckets.initialise(maxValue);
 
         System.out.println("Before: " + Arrays.toString(data));
 
@@ -61,10 +63,13 @@ public class Main {
             bucketArray = buckets.getBuckets().get(i).toArray(bucketArray);
             InsertionSort.sort(bucketArray);
             for (int j = 0; j < bucketArray.length; j++) {
-                data[currentIndex++] = bucketArray[j];
+                result[currentIndex++] = bucketArray[j];
             }
         }
-        System.out.println("After:  " + Arrays.toString(data));
+
+        long estimatedTime = System.nanoTime() - startTime;
+
+        System.out.println("\nTime: " + estimatedTime + "\nAfter:  " + Arrays.toString(result));
 
     }
 
