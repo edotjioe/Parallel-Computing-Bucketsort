@@ -24,7 +24,6 @@ public class BucketSort implements Runnable{
 
         // Distribute input array values into buckets
         for (int i = start; i < array.length; i = i + cores) {
-            if(array[i] != null)
             buckets.add(array[i], (int) Math.sqrt(array[i]));
         }
     }
