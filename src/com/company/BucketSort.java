@@ -6,14 +6,15 @@ public class BucketSort implements Runnable{
 
     private Integer[] array;
 
-    private int start;
+    private int start, cores;
 
     private Buckets buckets = new Buckets();
 
-    public BucketSort(Integer[] array, int start, String threadName) {
+    public BucketSort(Integer[] array, int start, String threadName, int cores) {
         this.array = array;
         this.start = start;
         this.threadName = threadName;
+        this.cores = cores;
     }
 
     private void sort(Integer[] array) throws InterruptedException {
@@ -22,7 +23,7 @@ public class BucketSort implements Runnable{
         }
 
         // Distribute input array values into buckets
-        for (int i = start; i < array.length; i = i + 2) {
+        for (int i = start; i < array.length; i = i + cores) {
             if(array[i] != null)
             buckets.add(array[i], (int) Math.sqrt(array[i]));
         }

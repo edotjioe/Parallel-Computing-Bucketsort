@@ -33,9 +33,9 @@ public class Main {
 
         long startTime = System.nanoTime();
 
-        bucketSort1 = new BucketSort(data, 0, "thread 1");
+        bucketSort1 = new BucketSort(data, 0, "thread 1", 2);
 
-        bucketSort2 = new BucketSort(data, 1, "thread 2");
+        bucketSort2 = new BucketSort(data, 1, "thread 2", 2);
 
         buckets.initialise(maxValue);
 
@@ -67,7 +67,7 @@ public class Main {
             }
         }
 
-        long estimatedTime = System.nanoTime() - startTime;
+        double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
         System.out.println("\nTime: " + estimatedTime + "\nAfter:  " + Arrays.toString(result));
 
