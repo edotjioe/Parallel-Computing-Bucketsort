@@ -10,7 +10,7 @@ public class Consumer implements Runnable{
     protected BlockingQueue<Item> queue;
 
     int counter = 0, size;
-
+    private List list;
 
     public Consumer(BlockingQueue<Item> queue, int maxValue, int size) {
         this.queue = queue;
@@ -27,15 +27,20 @@ public class Consumer implements Runnable{
 
     @Override
     public synchronized void run() {
+        list = new ArrayList<Integer>();
+
         while (counter < size) {
             Item nextEntry;
 
             try {
                 nextEntry = queue.take();
-
                 //System.out.println("Consumed " + nextEntry.toString());
+                list = buckets.get(nextEntry.getKey());
+                list = InsertionSort.sortAndReturn((ArrayList<Integer>) list);
 
                 buckets.get(nextEntry.getKey()).add(nextEntry.getValue());
+
+
                 counter++;
             } catch (InterruptedException e) {
                 e.printStackTrace();
