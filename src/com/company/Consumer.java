@@ -47,15 +47,29 @@ public class Consumer implements Runnable{
         return buckets;
     }
 
+//    @Override
+//    public synchronized String toString() {
+//        for (int i = 0; i < buckets.size(); i++) {
+//            System.out.print("Bucket list " + i + ": {");
+//            for (int j = 0; j < buckets.get(i).size(); j++) {
+//                System.out.print(", " + buckets.get(i).get(j));
+//            }
+//            System.out.println("}");
+//        }
+//        return null;
+//    }
+}
+
+class SmartConsumer extends Consumer {
+    private int id;
+
+    public SmartConsumer(BlockingQueue<Item> queue, int maxValue, int size, int id) {
+        super(queue, maxValue, size);
+        this.id = id;
+    }
+
     @Override
-    public String toString() {
-        for (int i = 0; i < buckets.size(); i++) {
-            System.out.print("Bucket list " + i + ": {");
-            for (int j = 0; j < buckets.get(i).size(); j++) {
-                System.out.print(", " + buckets.get(i).get(j));
-            }
-            System.out.println("}");
-        }
-        return null;
+    public synchronized void run() {
+        super.run();
     }
 }

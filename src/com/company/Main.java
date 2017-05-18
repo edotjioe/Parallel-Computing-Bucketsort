@@ -22,29 +22,36 @@ public class Main {
         Integer [] result = new Integer[100000];
 
         Producer producer = new Producer(queue, readFile("src\\com\\company\\files\\input.txt"));
-        Consumer consumer = new Consumer(queue, 10000, 100000);
+        Consumer consumer = new Consumer(queue, 10000, 50000);
+        Consumer consumer2 = new Consumer(queue, 10000, 50000);
 
         Thread threadProducer = new Thread(producer);
         Thread threadConsumer =  new Thread(consumer);
+        Thread threadConsumer2 =  new Thread(consumer2);
 
         long startTime = System.nanoTime();
 
-        System.out.println();
-
         threadProducer.start();
         threadConsumer.start();
+        threadConsumer2.start();
 
         try {
             threadProducer.join();
             threadConsumer.join();
+            threadConsumer2.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        //System.out.println(consumer.toString());
         int currentIndex = 0;
         for (int i = 0; i < consumer.getBuckets().size(); i++) {
             Integer[] bucketArray = new Integer[consumer.getBuckets().get(i).size()];
             bucketArray = consumer.getBuckets().get(i).toArray(bucketArray);
+            System.out.print("\nBucketArray " + i + ": ");
+            for (int j = 0; j < bucketArray.length; j++) {
+                System.out.print(", " + bucketArray[j]);
+            }
             InsertionSort.sort(bucketArray);
             for (int j = 0; j < bucketArray.length; j++) {
                 result[currentIndex++] = bucketArray[j];
@@ -53,9 +60,8 @@ public class Main {
 
         double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
-        //System.out.println(consumer.toString());
         //System.out.println("\nAfter:  " + Arrays.toString(result));
-        System.out.println("\nTime: " + estimatedTime + " milliseconds");
+        System.out.println("\nTime: " + estimatedTime + " seconds");
     }
 
     public static void testCores1() throws FileNotFoundException {
