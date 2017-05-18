@@ -11,7 +11,7 @@ public class Main {
 
     public static void main(String[] args) throws FileNotFoundException {
 
-        //testCores1();
+        testCores1();
 
         testProducerConsumer();
 
@@ -19,6 +19,7 @@ public class Main {
 
     public static void testProducerConsumer() throws FileNotFoundException {
         BlockingQueue<Item> queue = new ArrayBlockingQueue<>(100);
+        Integer [] result = new Integer[100000];
 
         Producer producer = new Producer(queue, readFile("src\\com\\company\\files\\input.txt"));
         Consumer consumer = new Consumer(queue, 10000, 100000);
@@ -27,9 +28,12 @@ public class Main {
         Thread threadConsumer =  new Thread(consumer);
 
         long startTime = System.nanoTime();
+
+        System.out.println();
+
         threadProducer.start();
         threadConsumer.start();
-        
+
         try {
             threadProducer.join();
             threadConsumer.join();
@@ -37,9 +41,20 @@ public class Main {
             e.printStackTrace();
         }
 
+        int currentIndex = 0;
+        for (int i = 0; i < consumer.getBuckets().size(); i++) {
+            Integer[] bucketArray = new Integer[consumer.getBuckets().get(i).size()];
+            bucketArray = consumer.getBuckets().get(i).toArray(bucketArray);
+            InsertionSort.sort(bucketArray);
+            for (int j = 0; j < bucketArray.length; j++) {
+                result[currentIndex++] = bucketArray[j];
+            }
+        }
+
         double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
-        System.out.println(consumer.toString());
+        //System.out.println(consumer.toString());
+        //System.out.println("\nAfter:  " + Arrays.toString(result));
         System.out.println("\nTime: " + estimatedTime + " milliseconds");
     }
 

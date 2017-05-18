@@ -43,6 +43,10 @@ public class Consumer implements Runnable{
         }
     }
 
+    public static HashMap<Integer, LinkedList<Integer>> getBuckets() {
+        return buckets;
+    }
+
     @Override
     public String toString() {
         for (int i = 0; i < buckets.size(); i++) {

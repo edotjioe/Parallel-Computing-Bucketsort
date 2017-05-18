@@ -21,6 +21,7 @@ public class Producer implements Runnable {
 
     @Override
     public void run() {
+        System.out.println("\u001B[34mStarting ProducerConsumerTest \u001B[0m");
 
         for (int i = 0; i < data.length; i++) {
             value = data[i];
