@@ -33,7 +33,7 @@ public class Producer implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println(i + ": Produced BucketValue " + key + " of value " + value + ".");
+            //System.out.println(i + ": Produced BucketValue " + key + " of value " + value + ".");
         }
     }
 }

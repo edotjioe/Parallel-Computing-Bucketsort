@@ -16,7 +16,7 @@ public class Main {
         BlockingQueue<Item> queue = new ArrayBlockingQueue<>(100);
 
         Producer producer = new Producer(queue, readFile("src\\com\\company\\files\\input.txt"));
-        Consumer consumer = new Consumer(queue);
+        Consumer consumer = new Consumer(queue, 10000, 100000);
 
         Thread threadProducer = new Thread(producer);
         Thread threadConsumer =  new Thread(consumer);
@@ -26,11 +26,12 @@ public class Main {
 
         try {
             threadProducer.join();
+            threadConsumer.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        System.out.println(queue.size());
+        System.out.println(consumer.toString());
 
     }
 
