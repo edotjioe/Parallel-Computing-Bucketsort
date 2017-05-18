@@ -13,6 +13,11 @@ public class Main {
 
         //testCores1();
 
+        testProducerConsumer();
+
+    }
+
+    public static void testProducerConsumer() throws FileNotFoundException {
         BlockingQueue<Item> queue = new ArrayBlockingQueue<>(100);
 
         Producer producer = new Producer(queue, readFile("src\\com\\company\\files\\input.txt"));
@@ -21,8 +26,10 @@ public class Main {
         Thread threadProducer = new Thread(producer);
         Thread threadConsumer =  new Thread(consumer);
 
+        long startTime = System.nanoTime();
         threadProducer.start();
         threadConsumer.start();
+        double estimatedTime = (System.nanoTime() - startTime) / 1000000.0;
 
         try {
             threadProducer.join();
@@ -32,7 +39,7 @@ public class Main {
         }
 
         System.out.println(consumer.toString());
-
+        System.out.println("\nTime: " + estimatedTime + " milliseconds");
     }
 
     public static void testCores1() throws FileNotFoundException {
