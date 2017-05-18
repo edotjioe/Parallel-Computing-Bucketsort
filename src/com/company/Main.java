@@ -29,14 +29,15 @@ public class Main {
         long startTime = System.nanoTime();
         threadProducer.start();
         threadConsumer.start();
-        double estimatedTime = (System.nanoTime() - startTime) / 1000000.0;
-
+        
         try {
             threadProducer.join();
             threadConsumer.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
         System.out.println(consumer.toString());
         System.out.println("\nTime: " + estimatedTime + " milliseconds");
