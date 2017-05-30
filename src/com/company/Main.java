@@ -2,20 +2,19 @@ package com.company;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.*;
 
 
 public class Main {
     static List<Integer[]> test = new ArrayList<>();
 
-    public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
+    public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException, InterruptedException {
 
-        testProducerConsumer(2);
+        testProducerConsumer(5);
 
     }
 
-    public static void testProducerConsumer(int threads) throws FileNotFoundException, UnsupportedEncodingException {
+    public static void testProducerConsumer(int threads) throws FileNotFoundException, UnsupportedEncodingException, InterruptedException {
         BlockingQueue<Item> queue = new ArrayBlockingQueue<>(100);
         Integer [] result = new Integer[100000];
 
@@ -28,12 +27,11 @@ public class Main {
 //        Thread threadConsumer2 =  new Thread(consumer2);
 
         List<InsertionSort> insertionSortList = new ArrayList<>();
-        List<Thread> threadList = new ArrayList<>();
 
+        ExecutorService threadPool = Executors.newFixedThreadPool(threads);
 
         for (int i = 0; i < threads ; i++) {
             insertionSortList.add(new InsertionSort("Thread_" + i));
-            threadList.add(new Thread(insertionSortList.get(i)));
         }
 
 
@@ -51,31 +49,19 @@ public class Main {
             e.printStackTrace();
         }
 
-
         for (int i = 0; i < consumer.getBuckets().size(); i = i + threads) {
             for (int j = 0; j < threads; j++) {
                 Integer[] bucketArray = new Integer[consumer.getBuckets().get(i + j).size()];
                 bucketArray = consumer.getBuckets().get(i + j).toArray(bucketArray);
-                sorter(bucketArray ,insertionSortList.get(j), threadList.get(j));
+                sorter(bucketArray ,insertionSortList.get(j), threadPool);
             }
 
-            try {
-                for (int j = 0; j < threads; j++) {
-                    threadList.get(j).join();
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            threadPool.awaitTermination(1000, TimeUnit.NANOSECONDS);
 
             for (int j = 0; j < threads ; j++) {
                 test.add(insertionSortList.get(j).getNum());
             }
         }
-
-
-
-        //System.out.println(consumer.toString());
-
 
         //inserting sorted buckets into result array
         int currentindex = 0;
@@ -83,10 +69,12 @@ public class Main {
             for (int k = 0; k < test.get(j).length; k++) {
                 result[currentindex++] = test.get(j)[k];
             }
-        }
-        double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
-        PrintWriter writer = new PrintWriter("src\\com\\company\\files\\output.txt", "UTF-8");
 
+        }
+
+        double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
+
+        PrintWriter writer = new PrintWriter("src\\com\\company\\files\\output.txt", "UTF-8");
 
         for (int i = 0; i < result.length; i++) {
             writer.println(result[i]);
@@ -98,10 +86,9 @@ public class Main {
         //System.out.println("\nAfter:  " + Arrays.toString(result));
     }
 
-    public static void sorter(Integer[] bucket, InsertionSort insertionSort, Thread threadInsertionSort){
-            insertionSort.setNum(bucket);
-            threadInsertionSort = new Thread(insertionSort);
-            threadInsertionSort.start();
+    public static void sorter(Integer[] bucket, InsertionSort insertionSort, ExecutorService threadPool){
+        insertionSort.setNum(bucket);
+        threadPool.submit(insertionSort);
     }
 
     public static void testCores1() throws FileNotFoundException {
