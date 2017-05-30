@@ -41,5 +41,6 @@ public class InsertionSort implements Runnable{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        System.out.println("\u001B[35mEnding " + threadName + "\u001B[0m");
     }
 }

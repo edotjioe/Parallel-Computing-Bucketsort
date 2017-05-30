@@ -6,11 +6,11 @@ import java.util.concurrent.*;
 
 
 public class Main {
-    static List<Integer[]> test = new ArrayList<>();
+    static List<Integer[]> sortedList = new ArrayList<>();
 
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException, InterruptedException {
 
-        testProducerConsumer(5);
+        testProducerConsumer(3);
 
     }
 
@@ -49,25 +49,30 @@ public class Main {
             e.printStackTrace();
         }
 
+        int bucketNumber = 0;
         for (int i = 0; i < consumer.getBuckets().size(); i = i + threads) {
             for (int j = 0; j < threads; j++) {
-                Integer[] bucketArray = new Integer[consumer.getBuckets().get(i + j).size()];
-                bucketArray = consumer.getBuckets().get(i + j).toArray(bucketArray);
-                sorter(bucketArray ,insertionSortList.get(j), threadPool);
+                if(bucketNumber < 100){
+                    Integer[] bucketArray = new Integer[consumer.getBuckets().get(i + j).size()];
+                    bucketArray = consumer.getBuckets().get(i + j).toArray(bucketArray);
+                    sorter(bucketArray ,insertionSortList.get(j), threadPool);
+                }
+                bucketNumber++;
             }
 
             threadPool.awaitTermination(1000, TimeUnit.NANOSECONDS);
 
             for (int j = 0; j < threads ; j++) {
-                test.add(insertionSortList.get(j).getNum());
+                if (!insertionSortList.get(j).getNum().equals(null))
+                sortedList.add(insertionSortList.get(j).getNum());
             }
         }
 
         //inserting sorted buckets into result array
         int currentindex = 0;
-        for (int j = 0; j < test.size(); j++) {
-            for (int k = 0; k < test.get(j).length; k++) {
-                result[currentindex++] = test.get(j)[k];
+        for (int j = 0; j < sortedList.size(); j++) {
+            for (int k = 0; k < sortedList.get(j).length && currentindex < 100000; k++) {
+                result[currentindex++] = sortedList.get(j)[k];
             }
 
         }
@@ -84,6 +89,8 @@ public class Main {
         System.out.println("\nTime: " + estimatedTime + " seconds");
 
         //System.out.println("\nAfter:  " + Arrays.toString(result));
+
+        threadPool.shutdown();
     }
 
     public static void sorter(Integer[] bucket, InsertionSort insertionSort, ExecutorService threadPool){
