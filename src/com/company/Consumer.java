@@ -33,9 +33,17 @@ public class Consumer implements Runnable{
             try {
                 nextEntry = queue.take();
 
-                //System.out.println("Consumed " + nextEntry.toString());
 
-                buckets.get(nextEntry.getKey()).add(nextEntry.getValue());
+
+                //System.out.println("Consumed " + nextEntry.toString());
+                if(nextEntry.getValue().equals(null)){
+                    System.out.println(nextEntry.getValue()+ counter);
+                }
+
+                if(!nextEntry.getValue().equals(null)){
+                    buckets.get(nextEntry.getKey()).add(nextEntry.getValue());
+                }
+
                 counter++;
             } catch (InterruptedException e) {
                 e.printStackTrace();

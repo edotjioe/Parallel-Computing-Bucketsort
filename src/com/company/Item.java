@@ -4,10 +4,10 @@ package com.company;
  * Created by EdoTyran on 5/18/2017.
  */
 public class Item {
-    int key;
-    int value;
+    Integer key;
+    Integer value;
 
-    public Item(int key, int value) {
+    public Item(Integer key, Integer value) {
         this.key = key;
         this.value = value;
     }
@@ -20,19 +20,19 @@ public class Item {
                 '}';
     }
 
-    public int getKey() {
+    public Integer getKey() {
         return key;
     }
 
-    public void setKey(int key) {
+    public void setKey(Integer key) {
         this.key = key;
     }
 
-    public int getValue() {
+    public Integer getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(Integer value) {
         this.value = value;
     }
 }
