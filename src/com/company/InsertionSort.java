@@ -35,12 +35,12 @@ public class InsertionSort implements Runnable{
 
     @Override
     public void run() {
-        System.out.println("\u001B[34mStarting " + threadName + "\u001B[0m");
+        //System.out.println("\u001B[34mStarting " + threadName + "\u001B[0m");
         try {
             sort(num);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("\u001B[35mEnding " + threadName + "\u001B[0m");
+        //System.out.println("\u001B[35mEnding " + threadName + "\u001B[0m");
     }
 }
