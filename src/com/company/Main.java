@@ -10,7 +10,7 @@ public class Main {
 
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException, InterruptedException {
 
-        System.out.println("Reading input file");
+        System.out.println("Reading input file\n");
 
         Integer [] input = readFile("src/com/company/files/input.txt");
 
@@ -36,11 +36,11 @@ public class Main {
         Thread threadConsumer =  new Thread(consumer);
 
         List<InsertionSort> insertionSortList = new ArrayList<>();
-
-        ExecutorService threadPool = Executors.newFixedThreadPool(threads);
+        List<Thread> threadList = new ArrayList<>();
 
         for (int i = 0; i < threads ; i++) {
             insertionSortList.add(new InsertionSort("Thread_" + i));
+            threadList.add(new Thread(insertionSortList.get(i)));
         }
 
         threadProducer.start();
@@ -56,56 +56,50 @@ public class Main {
 
         long startTime = System.nanoTime();
 
+        System.out.println("Starting sort");
+
+        System.out.print("|                                                                                                    |\n|");
+
         for (int i = 0; i < consumer.getBuckets().size(); i = i + threads) {
+
+            ExecutorService threadPool = Executors.newFixedThreadPool(threads);
+
             for (int j = 0; j < threads; j++) {
                 try {
                     Integer[] bucketArray = new Integer[consumer.getBuckets().get(i + j).size()];
                     bucketArray = consumer.getBuckets().get(i + j).toArray(bucketArray);
+
+                    insertionSortList.get(j).setNum(bucketArray);
+
                     sorter(bucketArray, insertionSortList.get(j), threadPool);
+
                     sortedList.add(i + j, insertionSortList.get(j).getNum());
-                } catch (NullPointerException nullErr){
+                } catch (NullPointerException nullErr) {
                     i = consumer.getBuckets().size();
                 }
+
+                System.out.print("=");
             }
 
-            threadPool.awaitTermination(1, TimeUnit.NANOSECONDS);
-
-//            for (int j = 0; j < threads ; j++) {
-//                if (!insertionSortList.get(j).getNum().equals(null))
-//                sortedList.add(insertionSortList.get(j).getNum());
-//            }
+            threadPool.shutdown();
+            threadPool.awaitTermination(1000, TimeUnit.MILLISECONDS);
         }
+
+
+        System.out.print("|");
 
         double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
-        //inserting sorted buckets into result array
-        int currentindex = 0;
-        for (int j = 0; j < sortedList.size(); j++) {
-            for (int k = 0; k < sortedList.get(j).length && currentindex < result.length; k++) {
-                result[currentindex++] = sortedList.get(j)[k];
-            }
+        writeFile(sortedList, "src/com/company/files/output.txt");
 
-        }
+        System.out.print("\nTime: " + estimatedTime + " seconds, with " + threads + " thread(s).");
 
-        //double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
-        PrintWriter writer = new PrintWriter("src/com/company/files/output.txt", "UTF-8");
-
-        for (int i = 0; i < result.length; i++) {
-            writer.println(result[i]);
-        }
-        writer.close();
-
-        System.out.println("\nTime: " + estimatedTime + " seconds, with " + threads + " thread(s).");
-
-        //System.out.println("\nAfter:  " + Arrays.toString(result));
-
-        threadPool.shutdown();
     }
 
-    public static void sorter(Integer[] bucket, InsertionSort insertionSort, ExecutorService threadPool){
+    public static void sorter(Integer[] bucket, InsertionSort insertionSort, ExecutorService thread){
         insertionSort.setNum(bucket);
-        threadPool.submit(insertionSort);
+        thread.submit(insertionSort);
     }
 
     public static Integer[] readFile(String path) throws FileNotFoundException {
@@ -124,6 +118,32 @@ public class Main {
         s.close();
 
         return array;
+    }
+
+    public static void writeFile(List<Integer []> result, String path) throws FileNotFoundException, UnsupportedEncodingException {
+
+        PrintWriter writer = new PrintWriter(path, "UTF-8");
+
+        for (int i = 0; i < result.size(); i++) {
+            for (int j = 0; j < result.get(i).length; j++) {
+                writer.println(result.get(i)[j]);
+            }
+
+        }
+        writer.close();
+    }
+
+    public static void progressBar(int percentage){
+        System.out.print("|");
+        for (int i = 0; i < percentage; i++) {
+            System.out.print("=");
+        }
+
+        for (int i = 0; i < 100 - percentage; i++) {
+            System.out.print(" ");
+        }
+
+        System.out.print("|\r");
     }
 
 }

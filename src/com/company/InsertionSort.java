@@ -4,7 +4,6 @@ public class InsertionSort implements Runnable{
 
     String threadName;
 
-
     private Integer[] num;
 
     private int start, cores;
