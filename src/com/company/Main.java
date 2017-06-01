@@ -82,7 +82,7 @@ public class Main {
             }
 
             threadPool.shutdown();
-            threadPool.awaitTermination(1000, TimeUnit.MILLISECONDS);
+            threadPool.awaitTermination(1, TimeUnit.MINUTES);
         }
 
 
