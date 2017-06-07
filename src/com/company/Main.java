@@ -14,6 +14,8 @@ public class Main {
 
         Integer [] input = readFile("src/com/company/files/input.txt");
 
+        System.out.println("Input size is: "+ input.length +"\n");
+
         testProducerConsumer(1, input);
 
         testProducerConsumer(2, input);
