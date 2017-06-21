@@ -18,10 +18,10 @@ public class Consumer implements Runnable{
 
         int bucketCount = (int) Math.sqrt(maxValue);
 
-        this.buckets = new HashMap<>(bucketCount);
+        buckets = new HashMap<>(bucketCount);
 
         for (int i = 0; i < bucketCount; i++) {
-            this.buckets.put(i, new LinkedList<>());
+            buckets.put(i, new LinkedList<>());
         }
     }
 
@@ -32,8 +32,6 @@ public class Consumer implements Runnable{
 
             try {
                 nextEntry = queue.take();
-
-
 
                 //System.out.println("Consumed " + nextEntry.toString());
                 if(nextEntry.getValue().equals(null)){

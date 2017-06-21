@@ -6,79 +6,85 @@ import java.util.concurrent.*;
 
 
 public class Main {
-    static List<Integer[]> sortedList = new ArrayList<>();
+    private static List<List<Integer>> bucketlist;
 
-    public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException, InterruptedException {
+    private static List<Integer[]> sortedList = new ArrayList<>();
+
+    private static List<InsertionSort> insertionSortList;
+
+    public static void main(String[] args) throws UnsupportedEncodingException, InterruptedException {
 
         System.out.println("Reading input file\n");
 
-        Integer [] input = readFile("src/com/company/files/input.txt");
+        Integer [] input = new Integer[0];
+        try {
+            input = readFile();
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+            return;
+        }
 
-        testProducerConsumer(1, input);
+        testparallel(1, input);
 
-        testProducerConsumer(2, input);
+        testparallel(2, input);
 
-        testProducerConsumer(3, input);
+        testparallel(3, input);
 
-        testProducerConsumer(4, input);
+        testparallel(4, input);
 
-        testProducerConsumer(5, input);
+        testparallel(5, input);
     }
 
-    public static void testProducerConsumer(int threads, Integer [] input) throws FileNotFoundException, UnsupportedEncodingException, InterruptedException {
-        BlockingQueue<Item> queue = new ArrayBlockingQueue<>(100);
-        Integer [] result = new Integer[input.length];
-
-        Producer producer = new Producer(queue, input);
-        Consumer consumer = new Consumer(queue, 10000, input.length);
-
-        Thread threadProducer = new Thread(producer);
-        Thread threadConsumer =  new Thread(consumer);
-
-        List<InsertionSort> insertionSortList = new ArrayList<>();
-        List<Thread> threadList = new ArrayList<>();
-
-        for (int i = 0; i < threads ; i++) {
-            insertionSortList.add(new InsertionSort("Thread_" + i));
-            threadList.add(new Thread(insertionSortList.get(i)));
-        }
-
-        threadProducer.start();
-        threadConsumer.start();
-
-        //waiting for buckets to be filled
-        try {
-            threadProducer.join();
-            threadConsumer.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+    public static void testparallel(int threads, Integer [] data) throws
+            UnsupportedEncodingException, InterruptedException {
         long startTime = System.nanoTime();
+
+        //Creating empty bucketList
+        bucketlist = new ArrayList<>();
+
+        for (int i = 0; i < 100; i++) {
+            bucketlist.add(new ArrayList<>());
+        }
+
+        //Creating different insertionSorters for the threads
+        insertionSortList = new ArrayList<>();
+
+        for (int i = 0; i < threads; i++) {
+            insertionSortList.add(new InsertionSort("thread" + i + 1));
+        }
+
+        //Inserting data into bucketList unsorted
+        for (int i = 0; i < data.length; i++) {
+            int value = data[i];
+            int key = (int) Math.sqrt(value) - 1;
+
+            bucketlist.get(key).add(value);
+        }
 
         System.out.println("Starting sort");
 
         System.out.print("|                                                                                                    |\n|");
 
-        for (int i = 0; i < consumer.getBuckets().size(); i = i + threads) {
-
+        for (int i = 0; i < bucketlist.size(); i = i + threads) {
             ExecutorService threadPool = Executors.newFixedThreadPool(threads);
-
             for (int j = 0; j < threads; j++) {
                 try {
-                    Integer[] bucketArray = new Integer[consumer.getBuckets().get(i + j).size()];
-                    bucketArray = consumer.getBuckets().get(i + j).toArray(bucketArray);
+                    if(i + j < 100){
+                        Integer[] bucketArray = new Integer[bucketlist.get(i + j).size()];
 
-                    insertionSortList.get(j).setNum(bucketArray);
+                        bucketArray = bucketlist.get(i + j).toArray(bucketArray);
 
-                    sorter(bucketArray, insertionSortList.get(j), threadPool);
+                        insertionSortList.get(j).setNum(bucketArray);
 
-                    sortedList.add(i + j, insertionSortList.get(j).getNum());
+                        sorter(bucketArray, insertionSortList.get(j), threadPool);
+
+                        sortedList.add(i + j, insertionSortList.get(j).getNum());
+
+                        System.out.print("=");
+                    }
                 } catch (NullPointerException nullErr) {
-                    i = consumer.getBuckets().size();
+                    i = bucketlist.size();
                 }
-
-                System.out.print("=");
             }
 
             threadPool.shutdown();
@@ -90,7 +96,11 @@ public class Main {
 
         double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
-        writeFile(sortedList, "src/com/company/files/output.txt");
+        try {
+            writeFile(sortedList, "src/com/company/files/output.txt");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         System.out.print("\nTime: " + estimatedTime + " seconds, with " + threads + " thread(s).");
 
@@ -102,12 +112,27 @@ public class Main {
         thread.submit(insertionSort);
     }
 
-    public static Integer[] readFile(String path) throws FileNotFoundException {
-        Scanner s = new Scanner(new File(path));
+    public static Integer[] readFile() throws FileNotFoundException {
+        System.out.println("Files inside Files folder:");
+        File file = new File("src/com/company/files");
+        for(String fileNames : file.list()) System.out.println(fileNames);
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Please paste the path of input.txt below: ");
+        String path = "";
+        path = scanner.nextLine();
+
+        if(path == "")
+            path = "src/com/company/Files/input.txt";
+
+        scanner.close();
+
+        scanner = new Scanner(new File(path));
         ArrayList<Integer> list = new ArrayList<>();
         Integer[] array;
-        while (s.hasNext()){
-            list.add(s.nextInt());
+        while (scanner.hasNext()){
+            list.add(scanner.nextInt());
         }
 
         array = new Integer[list.size()];
@@ -115,7 +140,7 @@ public class Main {
         for (int i = 0; i < list.size(); i++) {
             array[i] = list.get(i);
         }
-        s.close();
+        scanner.close();
 
         return array;
     }
@@ -132,18 +157,4 @@ public class Main {
         }
         writer.close();
     }
-
-    public static void progressBar(int percentage){
-        System.out.print("|");
-        for (int i = 0; i < percentage; i++) {
-            System.out.print("=");
-        }
-
-        for (int i = 0; i < 100 - percentage; i++) {
-            System.out.print(" ");
-        }
-
-        System.out.print("|\r");
-    }
-
 }
