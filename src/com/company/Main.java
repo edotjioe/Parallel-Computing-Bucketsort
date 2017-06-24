@@ -33,6 +33,16 @@ public class Main {
         testparallel(4, input);
 
         testparallel(5, input);
+
+        testparallel(6, input);
+
+        testparallel(7, input);
+
+        testparallel(8, input);
+
+        testparallel(9, input);
+
+        testparallel(10, input);
     }
 
     public static void testparallel(int threads, Integer [] data) throws
@@ -97,7 +107,7 @@ public class Main {
         double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
         try {
-            writeFile(sortedList, "src/com/company/files/output.txt");
+            writeFile(sortedList, "output.txt");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -114,8 +124,8 @@ public class Main {
 
     public static Integer[] readFile() throws FileNotFoundException {
         System.out.println("Files inside Files folder:");
-        File file = new File("src/com/company/files");
-        for(String fileNames : file.list()) System.out.println(fileNames);
+        //File file = new File("src/com/company/files");
+        //for(String fileNames : file.list()) System.out.println(fileNames);
 
         Scanner scanner = new Scanner(System.in);
 
