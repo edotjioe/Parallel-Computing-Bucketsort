@@ -1,194 +1,204 @@
 package com.company;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
+import javax.xml.bind.annotation.XmlType;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
 
 
 public class Main {
+    private static ArrayList<ArrayList<Integer>> bucketlist;
+    private static List<Integer[]> sortedList = new ArrayList<>();
+    private static List<InsertionSort> insertionSortList;
+    private static String pathOutput;
 
-    public static void main(String[] args) throws FileNotFoundException {
+    private static final Pair DEFAULT_BUCKET = new Pair(null, null);
 
-        testCores1();
+    public static void main(String[] args) throws UnsupportedEncodingException, InterruptedException {
 
-        testCores2();
+        System.out.println("Reading input file\n");
 
-        testCores3();
+        Integer [] input = new Integer[0];
+        try {
+            input = readFile();
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+            return;
+        }
 
+        initialize(input);
+
+        testConsumerProducer(1, 4, 20);
     }
 
-    public static void testCores1() throws FileNotFoundException {
-        Integer [] data;
-        Integer [] result;
-
-        data = readFile("src\\com\\company\\files\\input.txt");
-        result = new Integer[data.length];
-
-        BucketSort bucketSort1, bucketSort2;
-        Buckets buckets = new Buckets();
-
-        FinalList finalList = new FinalList();
-        finalList.setSize(data.length);
-
+    public static void testConsumerProducer(int producers, int consumers, int queueCapacity){
         long startTime = System.nanoTime();
 
-        bucketSort1 = new BucketSort(data, 0, "thread 1", 1);
+        System.out.println("Starting sort");
 
-        buckets.initialise(10000);
+        BlockingQueue<Pair> queue = new ArrayBlockingQueue<>(queueCapacity);
 
-        //System.out.println("Before: " + Arrays.toString(data));
+        ExecutorService executorService = Executors.newWorkStealingPool();
 
-        Thread t1 = new Thread(bucketSort1);
+        // the producer and consumer share a blocking queue
+//        Producer producer = new Producer(queue, bucketlist, "producer" + 1);
+//        executorService.submit(producer);
+        Producer producer;
 
-        t1.start();
+        for (int i = 0; i < producers; i++) {
+            int lower = (int) (bucketlist.size()*((double)i/producers));
+            int higher = (int) (bucketlist.size()*((double)(i+1)/producers));
+            ArrayList a = new ArrayList<>(bucketlist.subList(lower, higher));
+            producer = new Producer(queue, a, "");
+            executorService.submit(producer);
+        }
 
+        ArrayList<Consumer> consumerList = new ArrayList<>();
 
+        for (int i = 0; i < consumers; i++) {
+            consumerList.add(new Consumer(queue, "consumer" + (i + 1)));
+            executorService.submit(consumerList.get(i));
+        }
+
+        executorService.shutdown();
         try {
-            t1.join();
-        } catch (InterruptedException e){
+            executorService.awaitTermination(1, TimeUnit.DAYS);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        //System.out.println("Buckets: " + buckets.getBuckets().toString());
-        // Sort buckets and place back into input array
-        int currentIndex = 0;
-        for (int i = 0; i < buckets.getBuckets().size(); i++) {
-            Integer[] bucketArray = new Integer[buckets.getBuckets().get(i).size()];
-            bucketArray = buckets.getBuckets().get(i).toArray(bucketArray);
-            InsertionSort.sort(bucketArray);
-            for (int j = 0; j < bucketArray.length; j++) {
-                result[currentIndex++] = bucketArray[j];
+        for (int i = 0; i < consumerList.size(); i++) {
+            ArrayList<Pair> consumerBucket = consumerList.get(i).getBuckets();
+            for (int j = 0; j < consumerBucket.size(); j++) {
+                Pair bucket = consumerBucket.get(j);
+                sortedList.set((int) bucket.getT(), (Integer[]) bucket.getU());
             }
         }
 
         double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
-        System.out.println("\nTime: " + estimatedTime);
-        //System.out.println("\nAfter:  " + Arrays.toString(result));
-    }
-
-    public static void testCores2() throws FileNotFoundException {
-        Integer [] data;
-        Integer [] result;
-
-        data = readFile("src\\com\\company\\files\\input.txt");
-        result = new Integer[data.length];
-
-        BucketSort bucketSort1, bucketSort2;
-        Buckets buckets = new Buckets();
-
-        FinalList finalList = new FinalList();
-        finalList.setSize(data.length);
-
-        long startTime = System.nanoTime();
-
-        bucketSort1 = new BucketSort(data, 0, "thread 1", 2);
-
-        bucketSort2 = new BucketSort(data, 1, "thread 2", 2);
-
-        buckets.initialise(10000);
-
-        //System.out.println("Before: " + Arrays.toString(data));
-
-        Thread t1 = new Thread(bucketSort1);
-        Thread t2 = new Thread(bucketSort2);
-
-        t1.start();
-        t2.start();
-
-
         try {
-            t1.join();
-            t2.join();
-        } catch (InterruptedException e){
+            writeFile(sortedList, pathOutput);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
-        //System.out.println("Buckets: " + buckets.getBuckets().toString());
-        // Sort buckets and place back into input array
-        int currentIndex = 0;
-        for (int i = 0; i < buckets.getBuckets().size(); i++) {
-            Integer[] bucketArray = new Integer[buckets.getBuckets().get(i).size()];
-            bucketArray = buckets.getBuckets().get(i).toArray(bucketArray);
-            InsertionSort.sort(bucketArray);
-            for (int j = 0; j < bucketArray.length; j++) {
-                result[currentIndex++] = bucketArray[j];
-            }
-        }
+        System.out.print("\nTime: " + estimatedTime + " seconds, with " + consumers + " consumer(s) and " + producers + " producer(s).");
 
-        double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
-
-        System.out.println("\nTime: " + estimatedTime);
-        //System.out.println("\nAfter:  " + Arrays.toString(result));
     }
 
-    public static void testCores3() throws FileNotFoundException {
-        Integer [] data;
-        Integer [] result;
-
-        data = readFile("src\\com\\company\\files\\input.txt");
-        result = new Integer[data.length];
-
-        BucketSort bucketSort1, bucketSort2, bucketSort3;
-        Buckets buckets = new Buckets();
-
-        FinalList finalList = new FinalList();
-        finalList.setSize(data.length);
+    public static void testparallel(int threads) throws
+            UnsupportedEncodingException, InterruptedException {
 
         long startTime = System.nanoTime();
 
-        bucketSort1 = new BucketSort(data, 0, "thread 1", 3);
+        //Creating different insertionSorters for the threads
+        insertionSortList = new ArrayList<>();
 
-        bucketSort2 = new BucketSort(data, 1, "thread 2", 3);
-
-        bucketSort3 = new BucketSort(data, 1, "thread 2", 3);
-
-        buckets.initialise(10000);
-
-        //System.out.println("Before: " + Arrays.toString(data));
-
-        Thread t1 = new Thread(bucketSort1);
-        Thread t2 = new Thread(bucketSort2);
-        Thread t3 = new Thread(bucketSort3);
-
-        t1.start();
-        t2.start();
-        t3.start();
-
-        try {
-            t1.join();
-            t2.join();
-            t3.join();
-        } catch (InterruptedException e){
-            e.printStackTrace();
+        for (int i = 0; i < threads; i++) {
+            insertionSortList.add(new InsertionSort("thread" + i + 1));
         }
 
-        //System.out.println("Buckets: " + buckets.getBuckets().toString());
-        // Sort buckets and place back into input array
-        int currentIndex = 0;
-        for (int i = 0; i < buckets.getBuckets().size(); i++) {
-            Integer[] bucketArray = new Integer[buckets.getBuckets().get(i).size()];
-            bucketArray = buckets.getBuckets().get(i).toArray(bucketArray);
-            InsertionSort.sort(bucketArray);
-            for (int j = 0; j < bucketArray.length; j++) {
-                result[currentIndex++] = bucketArray[j];
+        System.out.println("Starting sort");
+
+        System.out.print("|                                                                                                    |\n|");
+
+        for (int i = 0; i < bucketlist.size(); i = i + threads) {
+            ExecutorService threadPool = Executors.newFixedThreadPool(threads);
+            for (int j = 0; j < threads; j++) {
+                try {
+                    if(i + j < 100){
+                        Integer[] bucketArray = new Integer[bucketlist.get(i + j).size()];
+
+                        bucketArray = bucketlist.get(i + j).toArray(bucketArray);
+
+                        insertionSortList.get(j).setNum(bucketArray);
+
+                        sorter(bucketArray, insertionSortList.get(j), threadPool);
+
+                        sortedList.add(i + j, insertionSortList.get(j).getNum());
+
+                        System.out.print("=");
+                    }
+                } catch (NullPointerException nullErr) {
+                    i = bucketlist.size();
+                }
             }
+
+            threadPool.shutdown();
+            threadPool.awaitTermination(1, TimeUnit.MINUTES);
         }
+
+
+        System.out.print("|");
 
         double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
-        System.out.println("\nTime: " + estimatedTime);
-        //System.out.println("\nAfter:  " + Arrays.toString(result));
+        try {
+            writeFile(sortedList, "output.txt");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        System.out.print("\nTime: " + estimatedTime + " seconds, with " + threads + " thread(s).");
+
+
     }
 
-    public static Integer[] readFile(String path) throws FileNotFoundException {
-        Scanner s = new Scanner(new File(path));
-        ArrayList<Integer> list = new ArrayList<Integer>();
+    protected static void initialize(Integer[] data){
+        System.out.println("Filling buckets");
+
+        for (int i = 0; i < 100; i++) {
+            sortedList.add(null);
+        }
+
+        //Creating empty bucketList
+        bucketlist = new ArrayList<>();
+
+        for (int i = 0; i < 100; i++) {
+            bucketlist.add(new ArrayList<>());
+        }
+
+        //Inserting data into bucketList unsorted
+        for (int i = 0; i < data.length; i++) {
+            int value = data[i];
+            int key = (int) Math.sqrt(value) - 1;
+
+            bucketlist.get(key).add(value);
+        }
+    }
+
+    public static void sorter(Integer[] bucket, InsertionSort insertionSort, ExecutorService thread){
+        insertionSort.setNum(bucket);
+        thread.submit(insertionSort);
+    }
+
+    public static Integer[] readFile() throws FileNotFoundException {
+        System.out.println("Files inside Files folder:");
+        //File file = new File("src/com/company/files");
+        //for(String fileNames : file.list()) System.out.println(fileNames);
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Please paste the path of input.txt below: ");
+        String pathInput = "";
+        pathInput = scanner.nextLine();
+
+        System.out.println("Please paste the path of output.txt below: ");
+        pathOutput = scanner.nextLine();
+
+        if(pathInput == "")
+            pathInput = "src/com/company/Files/input.txt";
+
+        scanner.close();
+
+        scanner = new Scanner(new File(pathInput));
+        ArrayList<Integer> list = new ArrayList<>();
         Integer[] array;
-        while (s.hasNext()){
-            list.add(s.nextInt());
+        while (scanner.hasNext()){
+            list.add(scanner.nextInt());
         }
 
         array = new Integer[list.size()];
@@ -196,9 +206,22 @@ public class Main {
         for (int i = 0; i < list.size(); i++) {
             array[i] = list.get(i);
         }
-        s.close();
+        scanner.close();
 
         return array;
     }
 
+    public static void writeFile(List<Integer []> result, String path) throws FileNotFoundException, UnsupportedEncodingException {
+
+        PrintWriter writer = new PrintWriter(path, "UTF-8");
+
+        for (int i = 0; i < result.size(); i++) {
+            Integer[] bucket = result.get(i);
+            for (int j = 0; j < bucket.length; j++) {
+                writer.println(bucket[j]);
+            }
+
+        }
+        writer.close();
+    }
 }

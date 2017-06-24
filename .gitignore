@@ -4,3 +4,6 @@
 out/com/company/
 
 /out/
+/src/com/company/files/output.txt
+
+\.scannerwork/
