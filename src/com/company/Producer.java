@@ -1,5 +1,6 @@
 package com.company;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
@@ -8,34 +9,31 @@ import java.util.concurrent.BlockingQueue;
  */
 public class Producer implements Runnable {
 
-    protected BlockingQueue<Item> queue;
+    protected BlockingQueue<Pair> queue;
 
-    protected Integer[] data;
+    protected ArrayList<ArrayList<Integer>> data;
 
-    private int key, value;
+    protected String id;
 
-    public Producer(BlockingQueue<Item> queue, Integer[] data) {
+    public Producer(BlockingQueue<Pair> queue, ArrayList<ArrayList<Integer>> data, String id) {
         this.queue = queue;
         this.data = data;
+        this.id = id;
     }
 
     @Override
     public void run() {
-        System.out.println("\u001B[34mStarting ProducerConsumerTest \u001B[0m");
-
-        for (int i = 0; i < data.length; i++) {
-            value = data[i];
-            key = (int) Math.sqrt(value) - 1;
-
-            Item item = new Item(key, value);
-
+        for (int i = 0; i < data.size(); i++) {
             try {
-                queue.put(item);
+                Pair pair = new Pair(i, data.get(i));
+
+                queue.put(pair);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            //System.out.println(i + ": Produced BucketValue " + key + " of value " + value + ".");
         }
+
+        System.out.println("Stopping consumers: " + Consumer.stop());
     }
 }
 

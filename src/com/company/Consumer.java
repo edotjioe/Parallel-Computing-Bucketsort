@@ -3,79 +3,82 @@ package com.company;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
-public class Consumer implements Runnable{
+public class Consumer implements Runnable {
 
-    protected static HashMap<Integer, LinkedList<Integer>> buckets;
+    protected ArrayList<Pair> buckets;
+    protected BlockingQueue<Pair> queue;
+    protected String threadName;
 
-    protected BlockingQueue<Item> queue;
+    private static Boolean running;
 
-    int counter = 0, size;
+    private final Pair DEFAULT_BUCKET = new Pair(null, null);
 
 
-    public Consumer(BlockingQueue<Item> queue, int maxValue, int size) {
+    public Consumer(BlockingQueue<Pair> queue, String threadName) {
         this.queue = queue;
-        this.size = size;
+        this.threadName = threadName;
 
-        int bucketCount = (int) Math.sqrt(maxValue);
+        buckets = new ArrayList<>();
+    }
 
-        buckets = new HashMap<>(bucketCount);
+    public static Boolean stop(){
+        running = false;
 
-        for (int i = 0; i < bucketCount; i++) {
-            buckets.put(i, new LinkedList<>());
+        if(running){
+            return false;
+        } else {
+            return true;
         }
+
     }
 
     @Override
-    public synchronized void run() {
-        while (counter < size) {
-            Item nextEntry;
+    public void run() {
+        running = true;
 
-            try {
-                nextEntry = queue.take();
+        System.out.println("Starting" + threadName);
 
-                //System.out.println("Consumed " + nextEntry.toString());
-                if(nextEntry.getValue().equals(null)){
-                    System.out.println(nextEntry.getValue()+ counter);
+        InsertionSort insertionSort = new InsertionSort("Thread" + threadName);
+
+        while (running || !queue.isEmpty()) {
+            Pair nextEntry;
+
+            if(!queue.isEmpty()){
+                try {
+                    nextEntry = queue.take();
+
+                    Integer[] bucketArray = convertIntegers((ArrayList<Integer>) nextEntry.getU());
+
+                    insertionSort.setNum(bucketArray);
+
+                    insertionSort.setNum(bucketArray);
+                    insertionSort.run();
+
+                    nextEntry = new Pair(nextEntry.getT(), bucketArray);
+
+                    buckets.add(nextEntry);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-
-                if(!nextEntry.getValue().equals(null)){
-                    buckets.get(nextEntry.getKey()).add(nextEntry.getValue());
-                }
-
-                counter++;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
+
+        System.out.println(threadName + " finished.");
     }
 
-    public static HashMap<Integer, LinkedList<Integer>> getBuckets() {
+    protected static Integer[] convertIntegers(ArrayList<Integer> integers)
+    {
+        Integer[] ret = new Integer[integers.size()];
+        Iterator<Integer> iterator = integers.iterator();
+        for (int i = 0; i < ret.length; i++)
+        {
+            ret[i] = iterator.next().intValue();
+        }
+        return ret;
+    }
+
+    public ArrayList<Pair> getBuckets() {
         return buckets;
-    }
-
-//    @Override
-//    public synchronized String toString() {
-//        for (int i = 0; i < buckets.size(); i++) {
-//            System.out.print("Bucket list " + i + ": {");
-//            for (int j = 0; j < buckets.get(i).size(); j++) {
-//                System.out.print(", " + buckets.get(i).get(j));
-//            }
-//            System.out.println("}");
-//        }
-//        return null;
-//    }
-}
-
-class SmartConsumer extends Consumer {
-    private int id;
-
-    public SmartConsumer(BlockingQueue<Item> queue, int maxValue, int size, int id) {
-        super(queue, maxValue, size);
-        this.id = id;
-    }
-
-    @Override
-    public synchronized void run() {
-        super.run();
     }
 }
