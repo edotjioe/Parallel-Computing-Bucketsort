@@ -1,36 +1,54 @@
 package com.company;
 
-import javax.xml.bind.annotation.XmlType;
-import java.io.*;
-import java.util.*;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 
+import static com.company.Util.FileUtil.readFile;
+import static com.company.Util.FileUtil.writeFile;
 
+/**
+ *
+ */
 public class Main {
     private static ArrayList<ArrayList<Integer>> bucketlist;
     private static List<Integer[]> sortedList = new ArrayList<>();
     private static List<InsertionSort> insertionSortList;
-    private static String pathOutput;
-
-    private static final Pair DEFAULT_BUCKET = new Pair(null, null);
 
     public static void main(String[] args) throws UnsupportedEncodingException, InterruptedException {
 
         System.out.println("Reading input file\n");
 
-        Integer [] input = new Integer[0];
+        Integer [] input;
         try {
             input = readFile();
         } catch (FileNotFoundException e) {
             System.out.println("File not found");
             return;
         }
+        long startTime = System.nanoTime();
+        Bucketsort bucketsort = new Bucketsort(input);
+        bucketsort.start();
+        double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
+        System.out.print("\nTime: " + estimatedTime);
 
-        initialize(input);
+       initialize(input);
 
-        testConsumerProducer(1, 4, 20);
+       //TL test
+        testparallel(4);
+
+       //ProducerConsumer Test
+       testConsumerProducer(1, 3, 20);
     }
 
+    /**
+     * Test for the concurrency pattern implementation of bucketsort
+     * @param producers
+     * @param consumers
+     * @param queueCapacity
+     */
     public static void testConsumerProducer(int producers, int consumers, int queueCapacity){
         long startTime = System.nanoTime();
 
@@ -40,9 +58,6 @@ public class Main {
 
         ExecutorService executorService = Executors.newWorkStealingPool();
 
-        // the producer and consumer share a blocking queue
-//        Producer producer = new Producer(queue, bucketlist, "producer" + 1);
-//        executorService.submit(producer);
         Producer producer;
 
         for (int i = 0; i < producers; i++) {
@@ -78,7 +93,7 @@ public class Main {
         double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
         try {
-            writeFile(sortedList, pathOutput);
+            writeFile(sortedList);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
@@ -89,6 +104,12 @@ public class Main {
 
     }
 
+    /**
+     * Test for the first parallel implementation of bucketsort
+     * @param threads
+     * @throws UnsupportedEncodingException
+     * @throws InterruptedException
+     */
     public static void testparallel(int threads) throws
             UnsupportedEncodingException, InterruptedException {
 
@@ -136,17 +157,21 @@ public class Main {
 
         double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
-        try {
-            writeFile(sortedList, "output.txt");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            writeFile(sortedList);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
 
         System.out.print("\nTime: " + estimatedTime + " seconds, with " + threads + " thread(s).");
 
 
     }
 
+    /**
+     * To initialize the different arraylists used
+     * @param data
+     */
     protected static void initialize(Integer[] data){
         System.out.println("Filling buckets");
 
@@ -170,58 +195,14 @@ public class Main {
         }
     }
 
+    /**
+     * Sorters an array of Integer
+     * @param bucket
+     * @param insertionSort
+     * @param thread
+     */
     public static void sorter(Integer[] bucket, InsertionSort insertionSort, ExecutorService thread){
         insertionSort.setNum(bucket);
         thread.submit(insertionSort);
-    }
-
-    public static Integer[] readFile() throws FileNotFoundException {
-        System.out.println("Files inside Files folder:");
-        //File file = new File("src/com/company/files");
-        //for(String fileNames : file.list()) System.out.println(fileNames);
-
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Please paste the path of input.txt below: ");
-        String pathInput = "";
-        pathInput = scanner.nextLine();
-
-        System.out.println("Please paste the path of output.txt below: ");
-        pathOutput = scanner.nextLine();
-
-        if(pathInput == "")
-            pathInput = "src/com/company/Files/input.txt";
-
-        scanner.close();
-
-        scanner = new Scanner(new File(pathInput));
-        ArrayList<Integer> list = new ArrayList<>();
-        Integer[] array;
-        while (scanner.hasNext()){
-            list.add(scanner.nextInt());
-        }
-
-        array = new Integer[list.size()];
-
-        for (int i = 0; i < list.size(); i++) {
-            array[i] = list.get(i);
-        }
-        scanner.close();
-
-        return array;
-    }
-
-    public static void writeFile(List<Integer []> result, String path) throws FileNotFoundException, UnsupportedEncodingException {
-
-        PrintWriter writer = new PrintWriter(path, "UTF-8");
-
-        for (int i = 0; i < result.size(); i++) {
-            Integer[] bucket = result.get(i);
-            for (int j = 0; j < bucket.length; j++) {
-                writer.println(bucket[j]);
-            }
-
-        }
-        writer.close();
     }
 }
