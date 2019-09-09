@@ -25,8 +25,9 @@ public class FileUtil {
         System.out.println("Please paste the path of output.txt below: ");
         pathOutput = scanner.nextLine();
 
+        //Edit this to your file location
         if(pathInput == "")
-            pathInput = "D:\\Files\\Dropbox\\Dropbox (Personal)\\Informatica HvA\\Jaar 3\\Parallel Computing\\Parallel-Computing-Bucketsort\\src\\com\\company\\files\\input.txt";
+            pathInput = "file\\location\\input.txt";
 
         scanner.close();
 
@@ -49,7 +50,7 @@ public class FileUtil {
 
     public static void writeFile(List<Integer []> result) throws FileNotFoundException, UnsupportedEncodingException {
 
-        PrintWriter writer = new PrintWriter("D:\\Files\\Dropbox\\Dropbox (Personal)\\Informatica HvA\\Jaar 3\\Parallel Computing\\Parallel-Computing-Bucketsort\\src\\com\\company\\files\\output.txt", "UTF-8");
+        PrintWriter writer = new PrintWriter("file\\location\\output.txt", "UTF-8");
 
         for (int i = 0; i < result.size(); i++) {
             Integer[] bucket = result.get(i);
