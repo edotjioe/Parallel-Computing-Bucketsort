@@ -1,4 +1,4 @@
-package com.company;
+package com.company.ProducerConsumer;
 
 /**
  * Created by EdoTyran on 6/24/2017.

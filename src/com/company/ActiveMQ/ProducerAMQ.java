@@ -4,7 +4,7 @@ package com.company.ActiveMQ;
  * Created by EdoTyran on 6/25/2017.
  */
 
-import com.company.InsertionSort;
+import com.company.Sort.InsertionSort;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
@@ -13,8 +13,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.company.Util.FileUtil.readFile;
-import static com.company.Util.FileUtil.writeFile;
+import static com.company.Util.FileUtil.read;
+import static com.company.Util.FileUtil.write;
 
 public class ProducerAMQ {
     private static final int AMOUNT_OF_BUCKETS = 100;
@@ -39,7 +39,7 @@ public class ProducerAMQ {
         //Reading input file
         Integer[] input = new Integer[0];
         try {
-            input = readFile();
+            input = read();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -157,10 +157,12 @@ class ConsumerAMQ {
         }
 
         try {
-            writeFile(sortedList);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+            write(sortedList);
+        }
+//        catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+        catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 

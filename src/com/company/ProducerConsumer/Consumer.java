@@ -1,4 +1,6 @@
-package com.company;
+package com.company.ProducerConsumer;
+
+import com.company.Sort.InsertionSort;
 
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -67,8 +69,7 @@ public class Consumer implements Runnable {
         System.out.println(threadName + " finished.");
     }
 
-    protected static Integer[] convertIntegers(ArrayList<Integer> integers)
-    {
+    protected static Integer[] convertIntegers(ArrayList<Integer> integers) {
         Integer[] ret = new Integer[integers.size()];
         Iterator<Integer> iterator = integers.iterator();
         for (int i = 0; i < ret.length; i++)

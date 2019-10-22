@@ -1,4 +1,4 @@
-package com.company;
+package com.company.Sort;
 
 public class InsertionSort implements Runnable{
 
@@ -6,13 +6,11 @@ public class InsertionSort implements Runnable{
 
     private Integer[] num;
 
-    private int start, cores;
-
     public InsertionSort(String threadName) {
         this.threadName = threadName;
     }
 
-    public static void sort(Integer[] num) throws InterruptedException{
+    public static void sort(Integer[] num) {
         int i, key;
         for (int j = 1; j < num.length; j++) {
             key = num[j];
@@ -34,12 +32,6 @@ public class InsertionSort implements Runnable{
 
     @Override
     public void run() {
-        //System.out.println("\u001B[34mStarting " + threadName + "\u001B[0m");
-        try {
-            sort(num);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        //System.out.println("\u001B[35mEnding " + threadName + "\u001B[0m");
+        sort(num);
     }
 }

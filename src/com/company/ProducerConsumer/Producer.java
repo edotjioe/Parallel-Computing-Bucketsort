@@ -1,6 +1,5 @@
-package com.company;
+package com.company.ProducerConsumer;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 

@@ -4,6 +4,8 @@
 out/com/company/
 
 /out/
-/src/com/company/files/output.txt
+/src/com/company/Files/output.txt
 
 \.scannerwork/
+
+lib/

@@ -1,13 +1,19 @@
 package com.company;
 
+import com.company.ProducerConsumer.Consumer;
+import com.company.ProducerConsumer.Pair;
+import com.company.ProducerConsumer.Producer;
+import com.company.Sort.Bucketsort;
+import com.company.Sort.InsertionSort;
+
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-import static com.company.Util.FileUtil.readFile;
-import static com.company.Util.FileUtil.writeFile;
+import static com.company.Util.FileUtil.read;
+import static com.company.Util.FileUtil.write;
 
 /**
  *
@@ -15,7 +21,7 @@ import static com.company.Util.FileUtil.writeFile;
 public class Main {
     private static ArrayList<ArrayList<Integer>> bucketlist;
     private static List<Integer[]> sortedList = new ArrayList<>();
-    private static List<InsertionSort> insertionSortList;
+    private static List<InsertionSort> insertionSortListPerThread;
 
     public static void main(String[] args) throws UnsupportedEncodingException, InterruptedException {
 
@@ -23,21 +29,21 @@ public class Main {
 
         Integer [] input;
         try {
-            input = readFile();
+            input = read();
         } catch (FileNotFoundException e) {
             System.out.println("File not found");
             return;
         }
         long startTime = System.nanoTime();
         Bucketsort bucketsort = new Bucketsort(input);
-        bucketsort.start();
+        bucketsort.testSortSpeed();
         double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
         System.out.print("\nTime: " + estimatedTime);
 
        initialize(input);
 
        //TL test
-        testparallel(4);
+       testParallel(4);
 
        //ProducerConsumer Test
        testConsumerProducer(1, 3, 20);
@@ -93,10 +99,12 @@ public class Main {
         double estimatedTime = (System.nanoTime() - startTime) / 1000000000.0;
 
         try {
-            writeFile(sortedList);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+            write(sortedList);
+        }
+//        catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+        catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
@@ -110,16 +118,16 @@ public class Main {
      * @throws UnsupportedEncodingException
      * @throws InterruptedException
      */
-    public static void testparallel(int threads) throws
+    public static void testParallel(int threads) throws
             UnsupportedEncodingException, InterruptedException {
 
         long startTime = System.nanoTime();
 
         //Creating different insertionSorters for the threads
-        insertionSortList = new ArrayList<>();
+        insertionSortListPerThread = new ArrayList<>();
 
         for (int i = 0; i < threads; i++) {
-            insertionSortList.add(new InsertionSort("thread" + i + 1));
+            insertionSortListPerThread.add(new InsertionSort("thread" + i + 1));
         }
 
         System.out.println("Starting sort");
@@ -135,11 +143,11 @@ public class Main {
 
                         bucketArray = bucketlist.get(i + j).toArray(bucketArray);
 
-                        insertionSortList.get(j).setNum(bucketArray);
+                        insertionSortListPerThread.get(j).setNum(bucketArray);
 
-                        sorter(bucketArray, insertionSortList.get(j), threadPool);
+                        sorter(bucketArray, insertionSortListPerThread.get(j), threadPool);
 
-                        sortedList.add(i + j, insertionSortList.get(j).getNum());
+                        sortedList.add(i + j, insertionSortListPerThread.get(j).getNum());
 
                         System.out.print("=");
                     }
@@ -179,14 +187,12 @@ public class Main {
             sortedList.add(null);
         }
 
-        //Creating empty bucketList
         bucketlist = new ArrayList<>();
 
         for (int i = 0; i < 100; i++) {
             bucketlist.add(new ArrayList<>());
         }
 
-        //Inserting data into bucketList unsorted
         for (int i = 0; i < data.length; i++) {
             int value = data[i];
             int key = (int) Math.sqrt(value) - 1;

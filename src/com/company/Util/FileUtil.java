@@ -9,33 +9,18 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * Created by EdoTyran on 6/25/2017.
+ *
  */
 public class FileUtil {
-    private static String pathOutput;
+    private static final String PATHOUTPUT = "src\\com\\company\\files\\output.txt";
+    private static final String PATHINPUT = "src\\com\\company\\files\\input.txt";
 
-    public static Integer[] readFile() throws FileNotFoundException {
-        System.out.println("Files inside Files folder:");
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Please paste the path of input.txt below: ");
-        String pathInput = "";
-        pathInput = scanner.nextLine();
-
-        System.out.println("Please paste the path of output.txt below: ");
-        pathOutput = scanner.nextLine();
-
-        //Edit this to your file location
-        if(pathInput == "")
-            pathInput = "file\\location\\input.txt";
-
-        scanner.close();
-
-        scanner = new Scanner(new File(pathInput));
+    public static Integer[] read() throws FileNotFoundException {
+        Scanner file = new Scanner(new File(PATHINPUT));
         ArrayList<Integer> list = new ArrayList<>();
         Integer[] array;
-        while (scanner.hasNext()){
-            list.add(scanner.nextInt());
+        while (file.hasNext()){
+            list.add(file.nextInt());
         }
 
         array = new Integer[list.size()];
@@ -43,22 +28,33 @@ public class FileUtil {
         for (int i = 0; i < list.size(); i++) {
             array[i] = list.get(i);
         }
-        scanner.close();
+        file.close();
 
         return array;
     }
 
-    public static void writeFile(List<Integer []> result) throws FileNotFoundException, UnsupportedEncodingException {
+    public static void write(List<Integer []> buckets) throws UnsupportedEncodingException {
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(PATHOUTPUT, "UTF-8");
+        } catch (FileNotFoundException ex) {
+            System.out.println("Output file not found.");
+            return;
+        }
 
-        PrintWriter writer = new PrintWriter("file\\location\\output.txt", "UTF-8");
+        for (int i = 0; i < buckets.size() - 100; i++) {
+            writeBucketIntoOutput(writer, buckets.get(i));
+        }
+        writer.close();
+    }
 
-        for (int i = 0; i < result.size(); i++) {
-            Integer[] bucket = result.get(i);
+    private static void writeBucketIntoOutput(PrintWriter writer, Integer[] bucket) {
+        try {
             for (int j = 0; j < bucket.length; j++) {
                 writer.println(bucket[j]);
             }
-
+        } catch (NullPointerException ex) {
+            System.out.println("found nothing.");
         }
-        writer.close();
     }
 }
